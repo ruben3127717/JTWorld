@@ -1,0 +1,6 @@
+SpeechRecognition[audio]==3.17.0
+deep-translator==1.11.4
+elevenlabs==2.69.0
+pygame==2.6.1
+httpx==0.28.1
+python-dotenv>=1.0,<2
