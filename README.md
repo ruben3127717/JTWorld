@@ -1,4 +1,4 @@
-# Parla
+# JT World
 
 A local voice translation studio. Speak or type in English, Russian, Spanish,
 Japanese, or French, then read and listen to the translated message.
@@ -16,7 +16,8 @@ translation, download an MP3, and revisit the last 20 translations in this tab.
 ## Setup on another machine
 
 Use Python 3.12 and install `requirements.txt` in a virtual environment. Create
-`.env` beside `main.py` with `ELEVENLABS_API_KEY=your_key`. Run `python web_app.py`.
+an optional `.env` beside `main.py` with `ELEVENLABS_API_KEY=your_key`, or paste
+your key into the website’s ElevenLabs API key box. Run `python web_app.py`.
 The included Windows launcher uses the existing `.venv312` environment.
 
 An existing environment variable takes precedence over `.env`. If changing the
@@ -36,7 +37,11 @@ back to premade George on the free plan. Translation remains visible if speech
 generation fails. Disable “Read translation aloud” to translate without using
 ElevenLabs credits, then press Listen when needed.
 
-Only the `web` folder is served. The key is never returned to the browser.
+Only the `web` folder is served. Keys entered in the website are held only in the
+current tab, cleared on reload, and never saved to browser storage or disk. Clear
+the field with **Clear key**. Audio requests pass the key through the loopback
+server to ElevenLabs over HTTPS for authentication; the server does not save it.
+The optional `.env` key is never returned to the browser.
 Recordings and generated audio are held in memory for this web workflow; tab
 history clears on reload. Providers receive audio/text as described in the app.
 

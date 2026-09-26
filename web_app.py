@@ -138,10 +138,22 @@ def translate():
 def speech():
     data, text = payload(limit=10000)
     target = language(data.get("target"))
-    if not translator.API_KEY:
-        raise RuntimeError("Voice playback needs ELEVENLABS_API_KEY in your .env file. Text translation is available.")
-    client = translator.ElevenLabs(api_key=translator.API_KEY, timeout=45)
-    audio = translator.generate_speech(client, text, target)
+    # Use the browser credential only for this request; never persist it or
+    # replace the process-wide key used by the command-line translator.
+    supplied_key = data.get("api_key", "")
+    if not isinstance(supplied_key, str) or len(supplied_key) > 512:
+        raise ValueError("Enter a valid ElevenLabs API key.")
+    api_key = supplied_key.strip() or translator.API_KEY
+    if not api_key:
+        raise RuntimeError("Add your ElevenLabs API key above to enable audio. Text translation is available.")
+    try:
+        client = translator.ElevenLabs(api_key=api_key, timeout=45)
+        audio = translator.generate_speech(client, text, target)
+    except RuntimeError as exc:
+        # Provider errors may echo credentials. Do not return them to the UI.
+        return jsonify(error=str(exc).replace(api_key, "[redacted]")), 502
+    except Exception:
+        return jsonify(error="ElevenLabs could not generate audio. Check your key and try again."), 502
     fallback = translator.VOICE_IDS[target] in translator._paid_only_voices
     return Response(audio, mimetype="audio/mpeg", headers={
         "X-Voice-Fallback": "true" if fallback else "false",

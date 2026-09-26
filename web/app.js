@@ -4,6 +4,18 @@ const names = {en:'English',ru:'Russian',es:'Spanish',ja:'Japanese',fr:'French'}
 const state = {mode:'voice',busy:false,recording:false,stream:null,context:null,node:null,
   chunks:[],started:0,lastSpeech:0,heardSpeech:false,timer:null,level:0,history:[],current:null};
 const audio = $('audioPlayer');
+let serverSpeechReady = false;
+function updateKeyStatus() {
+  const hasKey = Boolean($('elevenLabsKey').value.trim());
+  $('keyStatus').textContent = hasKey ? 'Key entered for this tab. It will be checked when you play audio.' : serverSpeechReady ? 'Using the key configured on this device.' : 'Add a key to enable audio. Text translation works without one.';
+  if (!$('connection').classList.contains('offline')) $('connection').lastChild.textContent = hasKey || serverSpeechReady ? 'Ready to connect' : 'Text translation ready';
+}
+$('elevenLabsKey').oninput = () => {updateKeyStatus();};
+$('clearApiKey').onclick = () => {$('elevenLabsKey').value='';updateKeyStatus();$('elevenLabsKey').focus();};
+// Never put this credential in browser storage, URLs, or translation history.
+window.addEventListener('pagehide', () => {$('elevenLabsKey').value='';});
+window.addEventListener('pageshow', updateKeyStatus);
+
 
 function message(text = '', error = false) {
   $('statusMessage').textContent = text; $('statusMessage').hidden = !text;
@@ -77,7 +89,7 @@ function renderResult(entry) {
   $('voiceNote').textContent=entry.fallback?'Multilingual voice':'';
   $('downloadAudio').hidden=!entry.audioUrl;
   $('audioPlayer').hidden=!entry.audioUrl;
-  if(entry.audioUrl){audio.src=entry.audioUrl;$('downloadAudio').href=entry.audioUrl;$('downloadAudio').download=`parla-${entry.target}.mp3`;}
+  if(entry.audioUrl){audio.src=entry.audioUrl;$('downloadAudio').href=entry.audioUrl;$('downloadAudio').download=`jt-world-${entry.target}.mp3`;}
   else{audio.removeAttribute('src');$('downloadAudio').removeAttribute('href');}
   $('resultPanel').hidden=false;
 }
@@ -98,7 +110,9 @@ async function translateText(text) {
 async function speak(entry) {
   if(!entry.audioUrl){
     message('Giving your words a voice…');
-    const response=await api('speech',{text:entry.translation,target:entry.target},true);
+    const apiKey=$('elevenLabsKey').value.trim();
+    if(!apiKey&&!serverSpeechReady){message('Add your ElevenLabs API key above, then press Listen.',true);$('elevenLabsKey').focus();return;}
+    const response=await api('speech',{text:entry.translation,target:entry.target,api_key:apiKey},true);
     entry.audioUrl=URL.createObjectURL(await response.blob());
     entry.fallback=response.headers.get('X-Voice-Fallback')==='true';renderResult(entry);
   }
@@ -192,6 +206,5 @@ function drawWave(time){
   requestAnimationFrame(drawWave);
 }requestAnimationFrame(drawWave);
 fetch('/api/status').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(data=>{
-  $('connection').lastChild.textContent=data.speech_ready?'Ready to connect':'Text translation ready';
-  if(!data.speech_ready){$('autoPlay').checked=false;message('Add your ElevenLabs key to .env and restart the server to enable spoken translations.');}
+  serverSpeechReady=data.speech_ready;updateKeyStatus();
 }).catch(()=>{$('connection').classList.add('offline');$('connection').lastChild.textContent='Server offline';message('Start run-website.cmd to connect to your translator.',true);});
