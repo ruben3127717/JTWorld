@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f3ee">
+  <title>Parla — A little closer, in every language.</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/style.css"><script defer src="/assets/app.js"></script>
+</head>
+<body>
+<svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+  <symbol id="mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/></symbol>
+  <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+  <symbol id="swap" viewBox="0 0 24 24"><path d="M4 7h15l-4-4m5 14H5l4 4M19 7l-4 4M5 17l4-4"/></symbol>
+  <symbol id="play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol>
+  <symbol id="copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></symbol>
+  <symbol id="download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+  <symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></symbol>
+</defs></svg>
+<aside class="sidebar">
+  <a class="brand" href="/" aria-label="Parla home"><span class="brand-mark">p<span>·</span></span>parla<span class="brand-dot">.</span></a>
+  <div class="sidebar-main">
+    <p class="eyebrow">YOUR SPACE</p>
+    <button class="nav-item active" id="newSession"><svg><use href="#globe"/></svg>Translation studio<span>↗</span></button>
+    <div class="history-heading"><p class="eyebrow">THIS SESSION</p><button id="clearHistory" class="text-button" hidden>Clear</button></div>
+    <div id="history" class="history"><div class="history-empty"><svg><use href="#clock"/></svg><p>Good conversations<br>start with a few words.</p><span>Your translations will appear here.</span></div></div>
+  </div>
+  <div class="sidebar-bottom"><div class="small-mark">P</div><div><strong>Your personal studio</strong><span>Made for understanding.</span></div><span class="live-dot"></span></div>
+</aside>
+<main>
+  <header class="topbar"><span>WORDS WITHOUT BORDERS</span><button class="how-button" id="openGuide">How it works <span>↗</span></button></header>
+  <div class="page-content">
+    <section class="intro"><div><div class="section-label"><span></span> A LITTLE CLOSER</div><h1>Your voice.<br><em>A world of possibilities.</em></h1><p>Speak naturally. Be understood in another language.</p></div><div class="intro-seal" aria-hidden="true"><svg><use href="#globe"/></svg><span>Five languages.<br>Endless connections.</span></div></section>
+    <section class="studio" aria-label="Translation studio">
+      <div class="studio-toolbar"><div class="mode-switch" role="tablist" aria-label="Input mode"><button id="voiceTab" role="tab" aria-selected="true" class="selected"><svg><use href="#mic"/></svg>Voice</button><button id="textTab" role="tab" aria-selected="false"><span class="type-icon">Tt</span>Text</button></div><span id="connection" class="connection"><i></i>Connecting</span></div>
+      <div class="language-row"><label><span>I'M SPEAKING</span><select id="source" aria-label="Source language"><option value="en">English</option><option value="ru">Russian</option><option value="es">Spanish</option><option value="ja">Japanese</option><option value="fr">French</option></select></label><button id="swapLanguages" class="swap-button" aria-label="Swap languages"><svg><use href="#swap"/></svg></button><label><span>TRANSLATE TO</span><select id="target" aria-label="Target language"><option value="fr">French</option><option value="en">English</option><option value="ru">Russian</option><option value="es">Spanish</option><option value="ja">Japanese</option></select></label></div>
+      <div id="voicePanel" class="voice-panel" role="tabpanel" aria-labelledby="voiceTab">
+        <div class="recording-badge" id="recordingBadge">YOUR NEXT CONVERSATION STARTS HERE</div>
+        <div class="voice-visual" id="voiceVisual"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><canvas id="waveform" width="800" height="140" aria-hidden="true"></canvas><button id="recordButton" class="record-button" aria-label="Start recording"><svg><use href="#mic"/></svg><span class="stop-shape"></span></button><span class="orbit-spark spark-one"></span><span class="orbit-spark spark-two"></span></div>
+        <h2 id="recordTitle">A simple hello goes a long way.</h2><p id="recordHint">Tap the microphone and say what's on your mind.</p>
+        <div class="record-options"><span id="recordTimer">00:00 / 00:30</span><span class="option-divider"></span><label>Pause to finish <select id="pauseSeconds" aria-label="Silence before recording ends"><option value="1.5">1.5s</option><option value="2" selected>2s</option><option value="3">3s</option><option value="0">Manual</option></select></label></div>
+      </div>
+      <div id="textPanel" class="text-panel" role="tabpanel" aria-labelledby="textTab" hidden><label for="typedText">Put your thoughts into words.</label><textarea id="typedText" maxlength="3000" placeholder="A greeting, a question, a story. Start here…"></textarea><div><span id="charCount">0 / 3,000</span><button id="translateTyped" class="primary-button">Translate text <svg><use href="#arrow"/></svg></button></div></div>
+      <div class="studio-bottom"><span><svg><use href="#globe"/></svg>One thought. A new connection.</span><label class="switch-label"><input id="autoPlay" type="checkbox" checked><span class="toggle"></span>Read translation aloud</label></div>
+    </section>
+    <div id="statusMessage" class="status-message" role="status" aria-live="polite" hidden></div>
+    <section id="resultPanel" class="result-panel" hidden aria-label="Translation result"><div class="result-heading"><p class="eyebrow">THE CONVERSATION CONTINUES</p><span id="resultTime"></span></div><div class="result-columns"><div class="source-result"><label id="originalLabel" for="sourceText">YOUR WORDS</label><textarea id="sourceText" maxlength="3000" aria-label="Edit your transcript"></textarea><button id="retranslate" class="text-button">Edit & translate again <span>↗</span></button></div><div class="target-result"><div class="translation-label"><span id="translatedLabel">TRANSLATION</span><button id="copyText" class="icon-button" aria-label="Copy translation"><svg><use href="#copy"/></svg></button></div><p id="translatedText" dir="auto"></p><div class="audio-actions"><button id="playAudio" class="listen-button"><svg><use href="#play"/></svg><span>Listen</span></button><a id="downloadAudio" class="icon-button" aria-label="Download translated audio" download="parla-translation.mp3" hidden><svg><use href="#download"/></svg></a><span id="voiceNote"></span></div><audio id="audioPlayer" controls hidden></audio></div></div></section>
+    <section class="language-footer"><div><span class="eyebrow">SAY IT YOUR WAY</span><p>Different words. The same you.</p></div><div class="language-chips"><span>Hello</span><span lang="ru">Привет</span><span lang="es">Hola</span><span lang="ja">こんにちは</span><span lang="fr">Bonjour</span></div></section>
+    <footer><span>Built for the moments between languages.</span><span>Audio & text are processed by translation services.<button id="privacyInfo" class="text-button">Details ↗</button></span></footer>
+  </div>
+</main>
+<dialog id="guide"><button id="closeGuide" class="dialog-close" aria-label="Close guide">×</button><div class="section-label">MEET PARLA</div><h2>A conversation,<br>without the distance.</h2><ol><li><strong>Choose two languages.</strong><p>Tell us what you speak and what you'd like to hear.</p></li><li><strong>Speak, or write.</strong><p>Allow microphone access, then record up to 30 seconds. Pause to finish, or tap the button again.</p></li><li><strong>Make yourself understood.</strong><p>Read, listen, copy, or download your translation. Edit the transcript whenever you need to.</p></li></ol><div class="privacy-note">Your recording goes to Google for transcription. Text is translated by Google or MyMemory, then sent to ElevenLabs for speech. Session history stays in this browser tab and clears when you reload. Your API key stays on the local server. If your selected voice requires a paid plan, a premade multilingual voice is used.</div></dialog>
+</body></html>
