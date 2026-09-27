@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f3ee">
-  <title>JT World — A little closer, in every language.</title>
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/style.css"><script defer src="/assets/app.js"></script>
+  <title>JT World — The Language Studio</title>
+  <link rel="icon" href="/assets/favicon.svg?v=jt-calm-2" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/style.css?v=jt-calm-2">
+  <link rel="stylesheet" href="/assets/calm.css?v=jt-calm-2">
+  <script defer src="/assets/ui.js?v=jt-calm-2"></script>
+  <script defer src="/assets/app.js?v=jt-calm-2"></script>
 </head>
 <body>
 <svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
@@ -29,15 +32,16 @@
   <div class="sidebar-bottom"><div class="small-mark">JT</div><div><strong>Your personal studio</strong><span>Made for understanding.</span></div><span class="live-dot"></span></div>
 </aside>
 <main>
-  <header class="topbar"><span>WORDS WITHOUT BORDERS</span><button class="how-button" id="openGuide">How it works <span>↗</span></button></header>
+  <header class="topbar"><span>THE LANGUAGE STUDIO <b>/</b> JT WORLD</span><button class="how-button" id="openGuide">The experience <span>↗</span></button></header>
   <div class="page-content">
-    <section class="intro"><div><div class="section-label"><span></span> A LITTLE CLOSER</div><h1>Your voice.<br><em>A world of possibilities.</em></h1><p>Speak naturally. Be understood in another language.</p></div><div class="intro-seal" aria-hidden="true"><svg><use href="#globe"/></svg><span>Five languages.<br>Endless connections.</span></div></section>
-    <section class="voice-settings" aria-labelledby="voiceSettingsTitle">
+    <section class="intro"><div><div class="section-label"><span></span> CONNECTION, WITHOUT LIMITS</div><h1>A world of words.<br><em>One unmistakable voice.</em></h1><p>For the conversations that bring us closer.<br>Speak naturally. Let the world understand.</p></div><div class="intro-seal" aria-hidden="true"><div class="globe-halo"></div><svg><use href="#globe"/></svg><span>FIVE LANGUAGES<br>ONE SHARED WORLD</span></div><span class="hero-index" aria-hidden="true">01 — THE ART OF UNDERSTANDING</span></section>
+    <details class="voice-settings" aria-labelledby="voiceSettingsTitle">
+      <summary><span class="settings-icon">✧</span><span>Voice connection</span><span class="settings-caption">Personalize your experience</span><span class="settings-plus">+</span></summary>
       <label id="voiceSettingsTitle" for="elevenLabsKey">ElevenLabs API key <span>Enable spoken translations</span></label>
       <div class="key-controls"><input id="elevenLabsKey" type="password" placeholder="Paste your ElevenLabs API key" autocomplete="off" spellcheck="false" autocapitalize="none" maxlength="512" aria-describedby="keyPrivacy keyStatus"><button id="clearApiKey" class="how-button" type="button">Clear key</button></div>
-      <p id="keyPrivacy">Kept only in this tab until you clear it or reload. Not saved to disk. For audio, your key passes through the local server on this device to ElevenLabs over HTTPS.</p>
+      <p id="keyPrivacy">Kept only in this tab until you clear it or reload. Not saved to disk. For audio, your key is sent securely through the JT World server to ElevenLabs.</p>
       <p id="keyStatus" role="status" aria-live="polite"></p>
-    </section>
+    </details>
     <section class="studio" aria-label="Translation studio">
       <div class="studio-toolbar"><div class="mode-switch" role="tablist" aria-label="Input mode"><button id="voiceTab" role="tab" aria-selected="true" class="selected"><svg><use href="#mic"/></svg>Voice</button><button id="textTab" role="tab" aria-selected="false"><span class="type-icon">Tt</span>Text</button></div><span id="connection" class="connection"><i></i>Connecting</span></div>
       <div class="language-row"><label><span>I'M SPEAKING</span><select id="source" aria-label="Source language"><option value="en">English</option><option value="ru">Russian</option><option value="es">Spanish</option><option value="ja">Japanese</option><option value="fr">French</option></select></label><button id="swapLanguages" class="swap-button" aria-label="Swap languages"><svg><use href="#swap"/></svg></button><label><span>TRANSLATE TO</span><select id="target" aria-label="Target language"><option value="fr">French</option><option value="en">English</option><option value="ru">Russian</option><option value="es">Spanish</option><option value="ja">Japanese</option></select></label></div>
@@ -56,5 +60,5 @@
     <footer><span>Built for the moments between languages.</span><span>Audio & text are processed by translation services.<button id="privacyInfo" class="text-button">Details ↗</button></span></footer>
   </div>
 </main>
-<dialog id="guide"><button id="closeGuide" class="dialog-close" aria-label="Close guide">×</button><div class="section-label">MEET JT WORLD</div><h2>A conversation,<br>without the distance.</h2><ol><li><strong>Choose two languages.</strong><p>Tell us what you speak and what you'd like to hear.</p></li><li><strong>Speak, or write.</strong><p>Allow microphone access, then record up to 30 seconds. Pause to finish, or tap the button again.</p></li><li><strong>Make yourself understood.</strong><p>Read, listen, copy, or download your translation. Edit the transcript whenever you need to.</p></li></ol><div class="privacy-note">Your recording goes to Google for transcription. Text is translated by Google or MyMemory, then sent to ElevenLabs for speech. Session history stays in this browser tab and clears when you reload. A key entered here stays in this tab until cleared or reloaded and is sent through your local server to ElevenLabs only for audio. It is not saved to disk. An optional .env key stays configured on your device. If your selected voice requires a paid plan, a premade multilingual voice is used.</div></dialog>
+<dialog id="guide"><button id="closeGuide" class="dialog-close" aria-label="Close guide">×</button><div class="section-label">MEET JT WORLD</div><h2>A conversation,<br>without the distance.</h2><ol><li><strong>Choose two languages.</strong><p>Tell us what you speak and what you'd like to hear.</p></li><li><strong>Speak, or write.</strong><p>Allow microphone access, then record up to 30 seconds. Pause to finish, or tap the button again.</p></li><li><strong>Make yourself understood.</strong><p>Read, listen, copy, or download your translation. Edit the transcript whenever you need to.</p></li></ol><div class="privacy-note">Your recording goes to Google for transcription. Text is translated by Google or MyMemory, then sent to ElevenLabs for speech. Session history stays in this browser tab and clears when you reload. A key entered here stays in this tab until cleared or reloaded and is sent through the JT World server to ElevenLabs only for audio. It is not saved to disk. The public website requires your own key for audio; text translation does not require one. If your selected voice requires a paid plan, a premade multilingual voice is used.</div></dialog>
 </body></html>

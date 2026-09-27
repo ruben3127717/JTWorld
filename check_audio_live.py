@@ -1,5 +1,6 @@
 """Manual live check. Running this generates short phrases using API credits."""
 import main
+import pygame
 
 
 def run():
@@ -13,13 +14,13 @@ def run():
         audio = main.generate_speech(client, text, language)
         output = main.LAST_AUDIO_PATH.parent / f'check_{language}.mp3'
         output.write_bytes(audio)
-        sound = main.pygame.mixer.Sound(str(output))
+        sound = pygame.mixer.Sound(str(output))
         print(f'{language}: {len(audio)} bytes, {sound.get_length():.2f} seconds')
 
 
 if __name__ == '__main__':
-    main.pygame.mixer.init()
+    pygame.mixer.init()
     try:
         run()
     finally:
-        main.pygame.mixer.quit()
+        pygame.mixer.quit()

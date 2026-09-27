@@ -4,6 +4,7 @@ Run with .venv312/Scripts/python.exe web_app.py or run-website.cmd.
 Only web/ is served publicly; .env and Python source are never static assets.
 """
 import io
+import os
 import multiprocessing
 import threading
 import wave
@@ -11,10 +12,15 @@ from functools import wraps
 
 from flask import Flask, jsonify, request, Response
 from werkzeug.exceptions import HTTPException
+from werkzeug.middleware.proxy_fix import ProxyFix
 import main as translator
 
 app = Flask(__name__, static_folder="web", static_url_path="/assets")
-app.config.update(MAX_CONTENT_LENGTH=6 * 1024 * 1024, TRUSTED_HOSTS=["127.0.0.1", "localhost"])
+HOSTED = os.environ.get("VERCEL") == "1"
+app.config.update(MAX_CONTENT_LENGTH=4 * 1024 * 1024,
+                  TRUSTED_HOSTS=["127.0.0.1", "localhost", ".vercel.app"])
+if HOSTED:
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 LANGUAGES = {code: {"name": name, "locale": locale}
              for name, code, locale in translator.LANGUAGES.values()}
 provider_lock = threading.Lock()
@@ -26,7 +32,7 @@ def restrict_origin():
     if request.method == "POST":
         origin = request.headers.get("Origin")
         if origin and origin != request.host_url.rstrip("/"):
-            return jsonify(error="Open the translator from its local website."), 403
+            return jsonify(error="Open the translator from its own website."), 403
 
 
 @app.after_request
@@ -97,7 +103,7 @@ def index():
 
 @app.get("/api/status")
 def status():
-    return jsonify(speech_ready=bool(translator.API_KEY), languages=LANGUAGES,
+    return jsonify(speech_ready=bool(translator.API_KEY) and not HOSTED, languages=LANGUAGES,
                    pause_seconds=translator.END_OF_SPEECH_PAUSE_SECONDS)
 
 
@@ -143,18 +149,20 @@ def speech():
     supplied_key = data.get("api_key", "")
     if not isinstance(supplied_key, str) or len(supplied_key) > 512:
         raise ValueError("Enter a valid ElevenLabs API key.")
-    api_key = supplied_key.strip() or translator.API_KEY
+    api_key = supplied_key.strip() or ("" if HOSTED else translator.API_KEY)
     if not api_key:
         raise RuntimeError("Add your ElevenLabs API key above to enable audio. Text translation is available.")
     try:
         client = translator.ElevenLabs(api_key=api_key, timeout=45)
-        audio = translator.generate_speech(client, text, target)
+        # A free-plan rejection must not change voice selection for other users.
+        unavailable_voices = set()
+        audio = translator.generate_speech(client, text, target, unavailable_voices=unavailable_voices)
     except RuntimeError as exc:
         # Provider errors may echo credentials. Do not return them to the UI.
         return jsonify(error=str(exc).replace(api_key, "[redacted]")), 502
     except Exception:
         return jsonify(error="ElevenLabs could not generate audio. Check your key and try again."), 502
-    fallback = translator.VOICE_IDS[target] in translator._paid_only_voices
+    fallback = translator.VOICE_IDS[target] in unavailable_voices
     return Response(audio, mimetype="audio/mpeg", headers={
         "X-Voice-Fallback": "true" if fallback else "false",
         "Content-Disposition": 'inline; filename="translation.mp3"',

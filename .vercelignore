@@ -1,0 +1,12 @@
+.git
+.env
+.env.*
+.venv*
+.python
+.tools
+__pycache__
+output_audio
+test*.py
+check_audio_live.py
+*.log
+*.cmd

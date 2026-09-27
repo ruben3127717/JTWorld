@@ -18,14 +18,17 @@ window.addEventListener('pageshow', updateKeyStatus);
 
 
 function message(text = '', error = false) {
+  const wasHidden=$('statusMessage').hidden;
   $('statusMessage').textContent = text; $('statusMessage').hidden = !text;
   $('statusMessage').classList.toggle('error', error);
+  if(text&&wasHidden)window.JTUI?.reveal($('statusMessage'));
 }
 function busy(value, text) {
   state.busy = value;
   for (const id of ['source','target','swapLanguages','voiceTab','textTab','translateTyped','retranslate','newSession','clearHistory','pauseSeconds']) $(id).disabled = value || state.recording;
   $('recordButton').disabled = value && !state.recording;
   $('playAudio').disabled = value;
+  window.JTUI?.sync();
   if (text) message(text);
 }
 async function api(path, body, raw = false) {
@@ -39,7 +42,7 @@ async function api(path, body, raw = false) {
     return raw ? response : await response.json();
   } catch(error) {
     if (error.name === 'AbortError') throw new Error('This request took too long. Please try again in a moment.');
-    if (error instanceof TypeError) throw new Error('Cannot reach the translator. Make sure run-website.cmd is still running.');
+    if (error instanceof TypeError) throw new Error('Cannot reach the translator. Check your connection and try again.');
     throw error;
   } finally { clearTimeout(timeout); }
 }
@@ -51,6 +54,7 @@ function setMode(mode) {
     $(type+'Tab').setAttribute('aria-selected',String(type===mode));
     $(type+'Panel').hidden = type!==mode;
   }
+  window.JTUI?.reveal($(mode+'Panel'));
   if (mode==='text') $('typedText').focus();
 }
 $('voiceTab').onclick = () => setMode('voice');
@@ -59,7 +63,7 @@ $('typedText').oninput = () => $('charCount').textContent = `${$('typedText').va
 $('typedText').onkeydown = event => {if ((event.ctrlKey||event.metaKey)&&event.key==='Enter'&&!state.busy) translateText($('typedText').value);};
 $('translateTyped').onclick = () => translateText($('typedText').value);
 $('retranslate').onclick = () => translateText($('sourceText').value);
-function clearResult() { audio.pause(); audio.removeAttribute('src'); $('audioPlayer').hidden=true; state.current=null; $('resultPanel').hidden=true; message(); }
+function clearResult() { audio.pause(); audio.removeAttribute('src'); $('audioPlayer').hidden=true; state.current=null; $('resultPanel').hidden=true; window.JTUI?.sync(); message(); }
 $('swapLanguages').onclick = () => { const source=$('source').value; $('source').value=$('target').value; $('target').value=source; clearResult(); };
 $('source').onchange = $('target').onchange = clearResult;
 $('newSession').onclick = () => {if(state.busy||state.recording)return;clearResult();$('typedText').value='';$('typedText').oninput();window.scrollTo({top:0,behavior:'smooth'});};
@@ -80,6 +84,7 @@ function renderHistory() {
 }
 $('clearHistory').onclick=()=>{if(state.busy||state.recording)return;clearResult();state.history.forEach(e=>{if(e.audioUrl)URL.revokeObjectURL(e.audioUrl);});state.history=[];renderHistory();};
 function renderResult(entry) {
+  const newResult=state.current!==entry||$('resultPanel').hidden;
   if(state.current!==entry)audio.pause();state.current=entry;
   $('sourceText').value=entry.original;$('translatedText').textContent=entry.translation;
   $('translatedText').lang=entry.target;$('sourceText').lang=entry.source;
@@ -92,6 +97,8 @@ function renderResult(entry) {
   if(entry.audioUrl){audio.src=entry.audioUrl;$('downloadAudio').href=entry.audioUrl;$('downloadAudio').download=`jt-world-${entry.target}.mp3`;}
   else{audio.removeAttribute('src');$('downloadAudio').removeAttribute('href');}
   $('resultPanel').hidden=false;
+  window.JTUI?.sync();
+  if(newResult)window.JTUI?.reveal($('resultPanel'));
 }
 async function translateText(text) {
   if(state.busy||state.recording)return;
@@ -111,7 +118,7 @@ async function speak(entry) {
   if(!entry.audioUrl){
     message('Giving your words a voice…');
     const apiKey=$('elevenLabsKey').value.trim();
-    if(!apiKey&&!serverSpeechReady){message('Add your ElevenLabs API key above, then press Listen.',true);$('elevenLabsKey').focus();return;}
+    if(!apiKey&&!serverSpeechReady){message('Add your ElevenLabs API key above, then press Listen.',true);window.JTUI?.openSettings();$('elevenLabsKey').focus();return;}
     const response=await api('speech',{text:entry.translation,target:entry.target,api_key:apiKey},true);
     entry.audioUrl=URL.createObjectURL(await response.blob());
     entry.fallback=response.headers.get('X-Voice-Fallback')==='true';renderResult(entry);
@@ -159,8 +166,8 @@ async function startRecording(){
   try{
     state.stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true}});
     state.context=new AudioContext();await state.context.resume();
-    await state.context.audioWorklet.addModule('/assets/recorder.js');
-    state.node=new AudioWorkletNode(state.context,'parla-recorder');
+    await state.context.audioWorklet.addModule('/assets/recorder.js?v=jt-premium-1');
+    state.node=new AudioWorkletNode(state.context,'jt-world-recorder');
     const source=state.context.createMediaStreamSource(state.stream);source.connect(state.node);state.node.connect(state.context.destination);
     state.chunks=[];state.started=performance.now();state.lastSpeech=state.started;state.heardSpeech=false;state.recording=true;
     state.node.port.onmessage=event=>{
@@ -195,16 +202,18 @@ window.addEventListener('beforeunload',()=>{state.stream?.getTracks().forEach(t=
 
 // Ambient waveform becomes responsive to the microphone's actual amplitude.
 const canvas=$('waveform'),ctx=canvas.getContext('2d');
+const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 function drawWave(time){
+  if(reducedMotion.matches)time=0;
   ctx.clearRect(0,0,800,140);const amplitude=state.recording?Math.min(46,5+state.level*300):5;
   for(let i=0;i<85;i++){
     const x=20+i*9;if(x>315&&x<485)continue;
     const envelope=Math.sin(Math.PI*i/85);
     const height=3+Math.abs(Math.sin(i*.79+time/(state.recording?170:2000)))*amplitude*envelope;
-    ctx.fillStyle=state.recording?'#b95438':'#b6beaa';ctx.fillRect(x,70-height/2,2,height);
+    ctx.fillStyle=state.recording?'#9b80ad':'#a9b69b';ctx.fillRect(x,70-height/2,2,height);
   }
   requestAnimationFrame(drawWave);
 }requestAnimationFrame(drawWave);
 fetch('/api/status').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(data=>{
   serverSpeechReady=data.speech_ready;updateKeyStatus();
-}).catch(()=>{$('connection').classList.add('offline');$('connection').lastChild.textContent='Server offline';message('Start run-website.cmd to connect to your translator.',true);});
+}).catch(()=>{$('connection').classList.add('offline');$('connection').lastChild.textContent='Server offline';message('The translator is temporarily unavailable. Refresh the page in a moment.',true);});

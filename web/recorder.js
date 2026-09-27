@@ -1,5 +1,5 @@
 // Capture mono samples in an audio worklet without blocking the interface.
-class ParlaRecorder extends AudioWorkletProcessor {
+class JTWorldRecorder extends AudioWorkletProcessor {
   constructor() { super(); this.buffer = new Float32Array(2048); this.offset = 0; }
   process(inputs) {
     const samples = inputs[0]?.[0];
@@ -13,4 +13,4 @@ class ParlaRecorder extends AudioWorkletProcessor {
     return true;
   }
 }
-registerProcessor('parla-recorder', ParlaRecorder);
+registerProcessor('jt-world-recorder', JTWorldRecorder);

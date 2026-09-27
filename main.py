@@ -14,7 +14,6 @@ from dotenv import load_dotenv
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 load_dotenv(Path(__file__).resolve().with_name(".env"))
 import httpx
-import pygame
 import speech_recognition as sr
 from deep_translator import GoogleTranslator
 from elevenlabs.client import ElevenLabs
@@ -51,6 +50,7 @@ LAST_AUDIO_PATH = Path(__file__).resolve().parent / "output_audio" / "last_trans
 
 def choose_output_device():
     """Let the user route speech to speakers instead of an unintended monitor."""
+    import pygame
     from pygame._sdl2.audio import get_audio_device_names
 
     try:
@@ -84,10 +84,11 @@ def api_error_details(error):
     return code, message
 
 
-def generate_speech(client, text, target):
+def generate_speech(client, text, target, unavailable_voices=None):
     """Fallback only after an explicit paid-voice rejection, never on quota."""
+    blocked = _paid_only_voices if unavailable_voices is None else unavailable_voices
     selected = VOICE_IDS[target]
-    voice = FALLBACK_VOICE_ID if selected in _paid_only_voices else selected
+    voice = FALLBACK_VOICE_ID if selected in blocked else selected
     while True:
         try:
             audio = b"".join(client.text_to_speech.convert(
@@ -105,7 +106,7 @@ def generate_speech(client, text, target):
                 code == "payment_required" and "library voices" in detail.lower()
             )
             if paid_voice and voice != FALLBACK_VOICE_ID:
-                _paid_only_voices.add(selected)
+                blocked.add(selected)
                 print("Selected voice requires a paid plan; using premade George "
                       "for this language.")
                 voice = FALLBACK_VOICE_ID
@@ -128,6 +129,7 @@ def generate_speech(client, text, target):
 
 
 def play_audio(output):
+    import pygame
     try:
         pygame.mixer.init(devicename=AUDIO_OUTPUT_DEVICE)
         pygame.mixer.music.load(str(output))
